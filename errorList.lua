@@ -53,6 +53,6 @@ xErrD_LOC = GetLocale() == "enUS" and {
 	["can't attack while horrified."] = true,
 	["can't do that while horrified."] = true,
 	["target is friendly"] = false, --(Not on by default)
-}
+} or { }
 
 

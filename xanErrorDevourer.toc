@@ -2,7 +2,7 @@
 ## Title: xanErrorDevourer
 ## Notes: This addon devours errors. Nom-Nom-Nom Errors!
 ## Author: Xruptor
-## Version: 1.0
+## Version: 1.1
 ## SavedVariables: xErrD_DB, xErrD_CDB
 
 errorList.lua

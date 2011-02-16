@@ -56,7 +56,7 @@ function xED_Frame:PLAYER_LOGIN()
 		end
 	end
 	
-	DEFAULT_CHAT_FRAME:AddMessage("|cFF99CC33xanErrorDevourer|r [v|cFFDF2B2B"..ver.."|r] loaded")
+	DEFAULT_CHAT_FRAME:AddMessage("|cFF99CC33xanErrorDevourer|r [v|cFFDF2B2B"..ver.."|r] loaded   /xed")
 end
 
 --Nom-Nom-Nom Errors!
