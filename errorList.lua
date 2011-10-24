@@ -45,6 +45,7 @@ xErrD = {
 	[SPELL_FAILED_NO_COMBO_POINTS] = true, --That ability requires combo points.
 	[SPELL_FAILED_TARGETS_DEAD] = true, --Your target is dead
 	[SPELL_FAILED_AFFECTING_COMBAT] = true, --You are in combat
+	[SPELL_FAILED_TOO_CLOSE] = true,  --Target to close.
 }
 
 --localized error messages
