@@ -7,6 +7,7 @@
 	http://www.wowwiki.com/WoW_Constants/Errors
 	http://www.wowpedia.org/WoW_Constants/Spells
 	http://paste2.org/p/1134726
+	https://github.com/phanx/wow-globalstrings/blob/master/enUS.lua
 --------------------------]]
 
 xErrD = {
@@ -46,6 +47,8 @@ xErrD = {
 	[SPELL_FAILED_TARGETS_DEAD] = true, --Your target is dead
 	[SPELL_FAILED_AFFECTING_COMBAT] = true, --You are in combat
 	[SPELL_FAILED_TOO_CLOSE] = true,  --Target to close.
+	[ERR_BADATTACKPOS] = true, --you are too far away
+	[SPELL_FAILED_TARGET_FRIENDLY] = false, --target is friendly
 }
 
 --localized error messages
@@ -53,7 +56,6 @@ xErrD_LOC = GetLocale() == "enUS" and {
 	["you are too far away"] = true,
 	["can't attack while horrified."] = true,
 	["can't do that while horrified."] = true,
-	["target is friendly"] = false, --(Not on by default)
 } or { }
 
 
