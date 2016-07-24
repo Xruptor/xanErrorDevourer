@@ -12,6 +12,11 @@ local prevClickedBar
 local xED_Frame = CreateFrame("frame","xanErrorDevourer",UIParent)
 xED_Frame:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
 
+local debugf = tekDebug and tekDebug:GetFrame("xanErrorDevourer")
+local function Debug(...)
+    if debugf then debugf:AddMessage(string.join(", ", tostringall(...))) end
+end
+
 --[[------------------------
 	ENABLE
 --------------------------]]
