@@ -48,7 +48,15 @@ xErrD = {
 	[SPELL_FAILED_AFFECTING_COMBAT] = true, --You are in combat
 	[SPELL_FAILED_TOO_CLOSE] = true,  --Target to close.
 	[ERR_BADATTACKPOS] = true, --you are too far away
-	[SPELL_FAILED_TARGET_FRIENDLY] = false, --target is friendly
+	[SPELL_FAILED_TARGET_FRIENDLY] = false, --target is friendly,
+	[ERR_POTION_COOLDOWN] = false, --You cannot drink any more yet.
+	[ERR_ITEM_COOLDOWN] = false,
+	[SPELL_FAILED_MOVING] = false,
+	[SPELL_FAILED_TARGET_AURASTATE] = false, --You can't do that yet
+	[SPELL_FAILED_NO_ENDURANCE] = false,
+	[SPELL_FAILED_NOT_MOUNTED] = false, --you are mounted
+	[SPELL_FAILED_NOT_ON_TAXI] = false, --you are in flight
+	[ERR_PET_SPELL_OUT_OF_RANGE] = false, --Your pet is out of range.
 }
 
 --localized error messages

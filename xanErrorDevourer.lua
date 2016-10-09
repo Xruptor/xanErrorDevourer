@@ -8,6 +8,7 @@
 
 local storedBarCount = 0
 local prevClickedBar
+local errorList = ""
 
 local xED_Frame = CreateFrame("frame","xanErrorDevourer",UIParent)
 xED_Frame:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
@@ -15,6 +16,13 @@ xED_Frame:SetScript("OnEvent", function(self, event, ...) if self[event] then re
 local debugf = tekDebug and tekDebug:GetFrame("xanErrorDevourer")
 local function Debug(...)
     if debugf then debugf:AddMessage(string.join(", ", tostringall(...))) end
+end
+
+local function updateErrorList()
+	errorList = ""
+	for k, v in pairs(xErrD_DB) do
+		errorList = errorList.."|"..string.lower(k)
+	end
 end
 
 --[[------------------------
@@ -47,6 +55,9 @@ function xED_Frame:PLAYER_LOGIN()
 		xErrD_DB.dbver = ver
 	end
 	
+	--update error list
+	updateErrorList()
+	
 	--populate scroll
 	xED_Frame:DoErrorList()
 	
@@ -68,7 +79,18 @@ end
 local originalOnEvent = UIErrorsFrame:GetScript("OnEvent")
 UIErrorsFrame:SetScript("OnEvent", function(self, event, msg, r, g, b, ...)
 	--only allow errors that aren't in our list
-	if msg and not xErrD_DB[string.lower(msg)] then
+	if msg then
+	
+		--check out DB
+		if xErrD_DB[string.lower(msg)] then
+			return
+		end
+		--check with find in string
+		if errorList and string.find(errorList, string.lower(msg)) then
+			return
+		end
+		
+		--return original
 		return originalOnEvent(self, event, msg, r, g, b, ...)
 	end
 end)
@@ -146,6 +168,8 @@ RemErrorBTN:SetScript("OnClick", function()
 		if xErrD_DB[prevClickedBar.xData.name] then
 			xErrD_DB[prevClickedBar.xData.name] = nil --remove from currently active
 		end
+		--update error list
+		updateErrorList()
 		--refresh the scroll
 		xED_Frame:DoErrorList()
 	end
@@ -283,6 +307,8 @@ function xED_Frame:DoErrorList()
 					--delete it if it exsists
 					if xErrD_DB[self.xData.name] then xErrD_DB[self.xData.name] = nil end
 				end
+				--update error list
+				updateErrorList()
 			end
 			--highlight the bar ;)
 			self:GetParent():Click()
@@ -318,6 +344,9 @@ function xED_Frame:processAdd(err)
 	
 	xErrD_CDB[err] = true --lets add it to the custom DB
 	xErrD_DB[err] = true --lets automatically enable it
+	
+	--update error list
+	updateErrorList()
 	
 	--refresh the scroll
 	xED_Frame:DoErrorList()
