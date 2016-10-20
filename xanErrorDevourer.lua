@@ -77,7 +77,8 @@ end
 
 --Nom-Nom-Nom Errors!
 local originalOnEvent = UIErrorsFrame:GetScript("OnEvent")
-UIErrorsFrame:SetScript("OnEvent", function(self, event, msg, r, g, b, ...)
+UIErrorsFrame:SetScript("OnEvent", function(self, event, num, msg, r, g, b, ...)
+
 	--only allow errors that aren't in our list
 	if msg then
 	
@@ -91,7 +92,7 @@ UIErrorsFrame:SetScript("OnEvent", function(self, event, msg, r, g, b, ...)
 		end
 		
 		--return original
-		return originalOnEvent(self, event, msg, r, g, b, ...)
+		return originalOnEvent(self, event, num, msg, r, g, b, ...)
 	end
 end)
 
