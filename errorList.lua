@@ -64,6 +64,7 @@ xErrD_LOC = GetLocale() == "enUS" and {
 	["you are too far away"] = true,
 	["can't attack while horrified."] = true,
 	["can't do that while horrified."] = true,
+	["you cannot drink any more yet"] = false,
 } or { }
 
 
