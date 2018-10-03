@@ -2,9 +2,16 @@
 ## Title: xanErrorDevourer
 ## Notes: This addon devours errors. Nom-Nom-Nom Errors!
 ## Author: Xruptor
-## Version: 2.3
+## Version: 2.4
+## X-Curse-Project-ID: 86075
+## X-WoWI-ID: 19443
 ## OptionalDeps: tekDebug
 ## SavedVariables: xErrD_DB, xErrD_CDB
+
+libs\LibStub\LibStub.lua
+libs\AceLocale-3.0\AceLocale-3.0.xml
+
+locale\enUS.lua
 
 errorList.lua
 xanErrorDevourer.lua

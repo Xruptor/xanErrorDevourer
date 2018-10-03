@@ -6,14 +6,21 @@
 	You can add custom errors in the options menu.
 --]]
 
+local ADDON_NAME, addon = ...
+if not _G[ADDON_NAME] then
+	_G[ADDON_NAME] = CreateFrame("Frame", ADDON_NAME, UIParent)
+end
+addon = _G[ADDON_NAME]
+
+local L = LibStub("AceLocale-3.0"):GetLocale(ADDON_NAME)
+
 local storedBarCount = 0
 local prevClickedBar
 local errorList = ""
 
-local xED_Frame = CreateFrame("frame","xanErrorDevourer",UIParent)
-xED_Frame:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
+addon:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
 
-local debugf = tekDebug and tekDebug:GetFrame("xanErrorDevourer")
+local debugf = tekDebug and tekDebug:GetFrame(ADDON_NAME)
 local function Debug(...)
     if debugf then debugf:AddMessage(string.join(", ", tostringall(...))) end
 end
@@ -29,12 +36,11 @@ end
 	ENABLE
 --------------------------]]
 	
-function xED_Frame:PLAYER_LOGIN()
+function addon:PLAYER_LOGIN()
 
-	local ver = tonumber(GetAddOnMetadata("xanErrorDevourer","Version")) or 'Unknown'
-	
 	--Initialize custom DB
 	xErrD_CDB = xErrD_CDB or {}
+	xErrD_LOC = xErrD_LOC or {}
 	
 	--first time DB check
 	if xErrD_DB == nil then
@@ -59,20 +65,20 @@ function xED_Frame:PLAYER_LOGIN()
 	updateErrorList()
 	
 	--populate scroll
-	xED_Frame:DoErrorList()
+	addon:DoErrorList()
 	
-	xED_Frame:UnregisterEvent("PLAYER_LOGIN")
-	xED_Frame.PLAYER_LOGIN = nil
+	addon:UnregisterEvent("PLAYER_LOGIN")
+	addon.PLAYER_LOGIN = nil
 	
 	SLASH_XANERRORDEVOURER1 = "/xed";
 	SlashCmdList["XANERRORDEVOURER"] = function()
-		if xanErrorDevourer then
-			xanErrorDevourer:DoErrorList()
-			xanErrorDevourer:Show()
-		end
+		addon:DoErrorList()
+		addon:Show()
 	end
 	
-	DEFAULT_CHAT_FRAME:AddMessage("|cFF99CC33xanErrorDevourer|r [v|cFFDF2B2B"..ver.."|r] loaded   /xed")
+	local ver = GetAddOnMetadata(ADDON_NAME,"Version") or '1.0'
+	DEFAULT_CHAT_FRAME:AddMessage(string.format("|cFF99CC33%s|r [v|cFF20ff20%s|r] loaded:   /xed", ADDON_NAME, ver or "1.0"))
+	
 end
 
 --Nom-Nom-Nom Errors!
@@ -100,15 +106,15 @@ end)
 	OPTIONS
 --------------------------]]
 
-xED_Frame:SetFrameStrata("HIGH")
-xED_Frame:SetToplevel(true)
-xED_Frame:EnableMouse(true)
-xED_Frame:SetMovable(true)
-xED_Frame:SetClampedToScreen(true)
-xED_Frame:SetWidth(380)
-xED_Frame:SetHeight(570)
+addon:SetFrameStrata("HIGH")
+addon:SetToplevel(true)
+addon:EnableMouse(true)
+addon:SetMovable(true)
+addon:SetClampedToScreen(true)
+addon:SetWidth(380)
+addon:SetHeight(570)
 
-xED_Frame:SetBackdrop({
+addon:SetBackdrop({
 		bgFile = "Interface/Tooltips/UI-Tooltip-Background",
 		edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
 		tile = true,
@@ -117,26 +123,26 @@ xED_Frame:SetBackdrop({
 		insets = { left = 5, right = 5, top = 5, bottom = 5 }
 })
 
-xED_Frame:SetBackdropColor(0,0,0,1)
-xED_Frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+addon:SetBackdropColor(0,0,0,1)
+addon:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 
-local closeButton = CreateFrame("Button", nil, xED_Frame, "UIPanelCloseButton");
-closeButton:SetPoint("TOPRIGHT", xED_Frame, -15, -8);
+local closeButton = CreateFrame("Button", nil, addon, "UIPanelCloseButton");
+closeButton:SetPoint("TOPRIGHT", addon, -15, -8);
 
-local header = xED_Frame:CreateFontString("$parentHeaderText", "ARTWORK", "GameFontNormalSmall")
+local header = addon:CreateFontString("$parentHeaderText", "ARTWORK", "GameFontNormalSmall")
 header:SetJustifyH("LEFT")
 header:SetFontObject("GameFontNormal")
-header:SetPoint("CENTER", xED_Frame, "TOP", 0, -20)
-header:SetText("xanErrorDevourer")
+header:SetPoint("CENTER", addon, "TOP", 0, -20)
+header:SetText(ADDON_NAME)
 
-local nomnom = xED_Frame:CreateFontString("$parentNomText", "ARTWORK", "GameFontNormalSmall")
+local nomnom = addon:CreateFontString("$parentNomText", "ARTWORK", "GameFontNormalSmall")
 nomnom:SetJustifyH("LEFT")
 nomnom:SetFontObject("GameFontNormal")
-nomnom:SetPoint("CENTER", xED_Frame, "TOP", 0, -35)
-nomnom:SetText("|cFF99CC33Nom-Nom-Nom Errors!|r")
+nomnom:SetPoint("CENTER", addon, "TOP", 0, -35)
+nomnom:SetText(L.NomNomNom)
 
-local scrollFrame = CreateFrame("ScrollFrame", "xanErrorDevourer_Scroll", xED_Frame, "UIPanelScrollFrameTemplate")
-local scrollFrame_Child = CreateFrame("frame", "xanErrorDevourer_ScrollChild", scrollFrame)
+local scrollFrame = CreateFrame("ScrollFrame", ADDON_NAME.."_Scroll", addon, "UIPanelScrollFrameTemplate")
+local scrollFrame_Child = CreateFrame("frame", ADDON_NAME.."_ScrollChild", scrollFrame)
 scrollFrame:SetPoint("TOPLEFT", 10, -50) 
 --scrollbar on the right (x shifts the slider left or right)
 scrollFrame:SetPoint("BOTTOMRIGHT", -40, 70) 
@@ -144,22 +150,22 @@ scrollFrame:SetScrollChild(scrollFrame_Child)
 
 --hide both frames
 scrollFrame:Hide()
-xED_Frame:Hide()
+addon:Hide()
 
 --Add Error
-addErrorBTN = CreateFrame("Button", "xanErrorDevourer_AddError", xED_Frame, "UIPanelButtonTemplate")
+addErrorBTN = CreateFrame("Button", ADDON_NAME.."_AddError", addon, "UIPanelButtonTemplate")
 addErrorBTN:SetWidth(120)
 addErrorBTN:SetHeight(25)
-addErrorBTN:SetPoint("BOTTOMLEFT", xED_Frame, "BOTTOMLEFT", 20, 15)
-addErrorBTN:SetText("Add Error")
+addErrorBTN:SetPoint("BOTTOMLEFT", addon, "BOTTOMLEFT", 20, 15)
+addErrorBTN:SetText(L.AddError)
 addErrorBTN:SetScript("OnClick", function() StaticPopup_Show("XANERRD_ADDERROR") end)
 
 --Remove Error
-RemErrorBTN = CreateFrame("Button", "xanErrorDevourer_RemoveError", xED_Frame, "UIPanelButtonTemplate")
+RemErrorBTN = CreateFrame("Button", ADDON_NAME.."_RemoveError", addon, "UIPanelButtonTemplate")
 RemErrorBTN:SetWidth(120)
 RemErrorBTN:SetHeight(25)
-RemErrorBTN:SetPoint("BOTTOMRIGHT", xED_Frame, "BOTTOMRIGHT", -20, 15)
-RemErrorBTN:SetText("Remove Error")
+RemErrorBTN:SetPoint("BOTTOMRIGHT", addon, "BOTTOMRIGHT", -20, 15)
+RemErrorBTN:SetText(L.RemoveError)
 RemErrorBTN:SetScript("OnClick", function()
 	if prevClickedBar and prevClickedBar.xData and prevClickedBar.xData.val and prevClickedBar.xData.val == 3 then
 		--delete the custom entry
@@ -172,16 +178,16 @@ RemErrorBTN:SetScript("OnClick", function()
 		--update error list
 		updateErrorList()
 		--refresh the scroll
-		xED_Frame:DoErrorList()
+		addon:DoErrorList()
 	end
 end)
 RemErrorBTN:Disable()
 
 --add error popup box
 StaticPopupDialogs["XANERRD_ADDERROR"] = {
-	text = "Please type the error exactly!  (Including Punctuation)",
-	button1 = "Yes",
-	button2 = "No",
+	text = L.InfoCustomAdd,
+	button1 = L.Yes,
+	button2 = L.No,
 	hasEditBox = true,
     hasWideEditBox = true,
 	timeout = 0,
@@ -190,13 +196,13 @@ StaticPopupDialogs["XANERRD_ADDERROR"] = {
 	EditBoxOnEscapePressed = function(self) self:GetParent():Hide() end,
 	OnAccept = function (self, data, data2)
 		local text = self.editBox:GetText()
-		xED_Frame:processAdd(text)
+		addon:processAdd(text)
 	end,
 	whileDead = 1,
 	maxLetters = 255,
 }
 
-function xED_Frame:DoErrorList()
+function addon:DoErrorList()
 	scrollFrame_Child:SetPoint("TOPLEFT")
 	scrollFrame_Child:SetWidth(scrollFrame:GetWidth())
 	scrollFrame_Child:SetHeight(scrollFrame:GetHeight())
@@ -336,7 +342,7 @@ end
 	ADD/REMOVE CUSTOM ERROR
 --------------------------]]
 
-function xED_Frame:processAdd(err)
+function addon:processAdd(err)
 	if not err then return end
 	if not xErrD_CDB then return end
 	
@@ -350,11 +356,11 @@ function xED_Frame:processAdd(err)
 	updateErrorList()
 	
 	--refresh the scroll
-	xED_Frame:DoErrorList()
+	addon:DoErrorList()
 end
 
 --[[------------------------
 	INITIALIZE
 --------------------------]]
 
-if IsLoggedIn() then xED_Frame:PLAYER_LOGIN() else xED_Frame:RegisterEvent("PLAYER_LOGIN") end
+if IsLoggedIn() then addon:PLAYER_LOGIN() else addon:RegisterEvent("PLAYER_LOGIN") end

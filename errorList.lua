@@ -57,14 +57,5 @@ xErrD = {
 	[SPELL_FAILED_NOT_MOUNTED] = false, --you are mounted
 	[SPELL_FAILED_NOT_ON_TAXI] = false, --you are in flight
 	[ERR_PET_SPELL_OUT_OF_RANGE] = false, --Your pet is out of range.
+	[ERR_VOICE_CHAT_TARGET_NOT_FOUND] = false, --Could not find the player to invite to to the voice chat channel.
 }
-
---localized error messages
-xErrD_LOC = GetLocale() == "enUS" and {
-	["you are too far away"] = true,
-	["can't attack while horrified."] = true,
-	["can't do that while horrified."] = true,
-	["you cannot drink any more yet"] = false,
-} or { }
-
-
