@@ -1,8 +1,8 @@
-## Interface: 80000
+## Interface: 80300
 ## Title: xanErrorDevourer
 ## Notes: This addon devours errors. Nom-Nom-Nom Errors!
 ## Author: Xruptor
-## Version: 2.4
+## Version: 2.5
 ## X-Curse-Project-ID: 86075
 ## X-WoWI-ID: 19443
 ## OptionalDeps: tekDebug
