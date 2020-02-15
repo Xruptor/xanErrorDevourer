@@ -10,6 +10,8 @@
 	https://github.com/phanx/wow-globalstrings/blob/master/enUS.lua
 --------------------------]]
 
+local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+
 xErrD = {
 	[ERR_NO_ATTACK_TARGET] = true, --There is nothing to attack. 
 	[ERR_OUT_OF_RAGE] = true, -- Not enough rage
@@ -57,5 +59,8 @@ xErrD = {
 	[SPELL_FAILED_NOT_MOUNTED] = false, --you are mounted
 	[SPELL_FAILED_NOT_ON_TAXI] = false, --you are in flight
 	[ERR_PET_SPELL_OUT_OF_RANGE] = false, --Your pet is out of range.
-	[ERR_VOICE_CHAT_TARGET_NOT_FOUND] = false, --Could not find the player to invite to to the voice chat channel.
 }
+
+if IsRetail then
+	xErrD[ERR_VOICE_CHAT_TARGET_NOT_FOUND] = false --Could not find the player to invite to to the voice chat channel.
+end
