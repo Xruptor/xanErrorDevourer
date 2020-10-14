@@ -8,7 +8,7 @@
 
 local ADDON_NAME, addon = ...
 if not _G[ADDON_NAME] then
-	_G[ADDON_NAME] = CreateFrame("Frame", ADDON_NAME, UIParent)
+	_G[ADDON_NAME] = CreateFrame("Frame", ADDON_NAME, UIParent, BackdropTemplateMixin and "BackdropTemplate")
 end
 addon = _G[ADDON_NAME]
 
@@ -142,7 +142,7 @@ nomnom:SetPoint("CENTER", addon, "TOP", 0, -35)
 nomnom:SetText(L.NomNomNom)
 
 local scrollFrame = CreateFrame("ScrollFrame", ADDON_NAME.."_Scroll", addon, "UIPanelScrollFrameTemplate")
-local scrollFrame_Child = CreateFrame("frame", ADDON_NAME.."_ScrollChild", scrollFrame)
+local scrollFrame_Child = CreateFrame("frame", ADDON_NAME.."_ScrollChild", scrollFrame, BackdropTemplateMixin and "BackdropTemplate")
 scrollFrame:SetPoint("TOPLEFT", 10, -50) 
 --scrollbar on the right (x shifts the slider left or right)
 scrollFrame:SetPoint("BOTTOMRIGHT", -40, 70) 
@@ -232,7 +232,7 @@ function addon:DoErrorList()
 		--store the bar counts for future use
 		if barCount > storedBarCount then storedBarCount = barCount end
 		
-		local barSlot = _G["xED_Bar"..barCount] or CreateFrame("button", "xED_Bar"..barCount, scrollFrame_Child)
+		local barSlot = _G["xED_Bar"..barCount] or CreateFrame("button", "xED_Bar"..barCount, scrollFrame_Child, BackdropTemplateMixin and "BackdropTemplate")
 		
 		if barCount==1 then
 			barSlot:SetPoint("TOPLEFT",scrollFrame_Child, "TOPLEFT", 10, -10)
@@ -302,9 +302,7 @@ function addon:DoErrorList()
         end
 		
 		bar_chk:SetScript("OnClick", function(self)
-			local checked = (self:GetChecked() and true or false)
-			self:SetChecked(checked or true and false)
-			checked = self:GetChecked() and true or false
+			local checked = self:GetChecked()
 			
 			--update the DB
 			if self.xData and self.xData.name and xErrD_DB then
