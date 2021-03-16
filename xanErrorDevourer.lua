@@ -18,12 +18,33 @@ local storedBarCount = 0
 local prevClickedBar
 local errorList = ""
 
-addon:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
-
 local debugf = tekDebug and tekDebug:GetFrame(ADDON_NAME)
 local function Debug(...)
     if debugf then debugf:AddMessage(string.join(", ", tostringall(...))) end
 end
+
+addon:RegisterEvent("ADDON_LOADED")
+addon:SetScript("OnEvent", function(self, event, ...)
+	if event == "ADDON_LOADED" or event == "PLAYER_LOGIN" then
+		if event == "ADDON_LOADED" then
+			local arg1 = ...
+			if arg1 and arg1 == ADDON_NAME then
+				self:UnregisterEvent("ADDON_LOADED")
+				self:RegisterEvent("PLAYER_LOGIN")
+			end
+			return
+		end
+		if IsLoggedIn() then
+			self:EnableAddon(event, ...)
+			self:UnregisterEvent("PLAYER_LOGIN")
+		end
+		return
+	end
+	if self[event] then
+		return self[event](self, event, ...)
+	end
+end)
+
 
 local function updateErrorList()
 	errorList = ""
@@ -36,7 +57,7 @@ end
 	ENABLE
 --------------------------]]
 	
-function addon:PLAYER_LOGIN()
+function addon:EnableAddon()
 
 	--Initialize custom DB
 	xErrD_CDB = xErrD_CDB or {}
@@ -66,9 +87,6 @@ function addon:PLAYER_LOGIN()
 	
 	--populate scroll
 	addon:DoErrorList()
-	
-	addon:UnregisterEvent("PLAYER_LOGIN")
-	addon.PLAYER_LOGIN = nil
 	
 	SLASH_XANERRORDEVOURER1 = "/xed";
 	SlashCmdList["XANERRORDEVOURER"] = function()
@@ -356,9 +374,3 @@ function addon:processAdd(err)
 	--refresh the scroll
 	addon:DoErrorList()
 end
-
---[[------------------------
-	INITIALIZE
---------------------------]]
-
-if IsLoggedIn() then addon:PLAYER_LOGIN() else addon:RegisterEvent("PLAYER_LOGIN") end
