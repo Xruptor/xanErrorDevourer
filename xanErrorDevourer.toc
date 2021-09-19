@@ -1,11 +1,11 @@
-## Interface: 90005
-## Interface-Retail: 90005
+## Interface: 90100
+## Interface-Retail: 90100
 ## Interface-Classic: 11307
-## Interface-BCC: 20501
+## Interface-BCC: 20502
 ## Title: xanErrorDevourer
 ## Notes: This addon devours errors. Nom-Nom-Nom Errors!
 ## Author: Xruptor
-## Version: 3.1
+## Version: 3.2
 ## X-Curse-Project-ID: 86075
 ## X-WoWI-ID: 19443
 ## OptionalDeps: tekDebug
