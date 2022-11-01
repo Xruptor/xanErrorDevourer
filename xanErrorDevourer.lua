@@ -290,7 +290,7 @@ function addon:DoErrorList()
 		end)
 		
 		--check button stuff
-		local bar_chk = _G["xED_BarChk"..barCount] or CreateFrame("CheckButton", "xED_BarChk"..barCount, barSlot, "OptionsCheckButtonTemplate")
+		local bar_chk = _G["xED_BarChk"..barCount] or CreateFrame("CheckButton", "xED_BarChk"..barCount, barSlot, "InterfaceOptionsCheckButtonTemplate")
 		
 		--change text color depending on where the entry came from
 		if buildList[barCount].val == 1 then
