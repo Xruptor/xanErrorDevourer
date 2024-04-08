@@ -8,7 +8,7 @@
 ## Notes-zhCN: 插件会屏蔽红字错误提示。 Nom-Nom-Nom 错误！
 ## Notes-zhTW: 插件會屏蔽紅字錯誤提示。 Nom-Nom-Nom 錯誤！
 ## Author: Xruptor
-## Version: 4.0
+## Version: 4.1
 ## IconTexture: 252996
 ## X-Curse-Project-ID: 86075
 ## X-WoWI-ID: 19443
