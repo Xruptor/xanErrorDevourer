@@ -1,13 +1,10 @@
-## Interface: 100207
-## Interface-Retail: 100207
-## Interface-Classic: 11502
-## Interface-Cata: 40400
+## Interface: 100207, 110000, 110002, 11502, 40400
 ## Title: xanErrorDevourer
 ## Notes: This addon devours errors. Nom-Nom-Nom Errors!
 ## Notes-zhCN: 插件会屏蔽红字错误提示。 Nom-Nom-Nom 错误！
 ## Notes-zhTW: 插件會屏蔽紅字錯誤提示。 Nom-Nom-Nom 錯誤！
 ## Author: Xruptor
-## Version: 4.3
+## Version: 4.4
 ## IconTexture: 252996
 ## X-Curse-Project-ID: 86075
 ## X-WoWI-ID: 19443
