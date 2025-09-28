@@ -102,7 +102,7 @@ end
 --Nom-Nom-Nom Errors!
 local originalOnEvent = UIErrorsFrame:GetScript("OnEvent")
 UIErrorsFrame:SetScript("OnEvent", function(self, event, num, msg, r, g, b, ...)
-
+	if not xErrD_DB then return end
 	--only allow errors that aren't in our list
 	if msg then
 	
