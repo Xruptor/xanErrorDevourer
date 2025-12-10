@@ -213,7 +213,9 @@ StaticPopupDialogs["XANERRD_ADDERROR"] = {
 	hideOnEscape = 1,
 	EditBoxOnEscapePressed = function(self) self:GetParent():Hide() end,
 	OnAccept = function (self, data, data2)
-		local text = self.editBox:GetText()
+		--for backwards compatibility for older clients
+		local eb = self.editBox or self.EditBox or self:GetEditBox()
+		local text = eb:GetText()
 		addon:processAdd(text)
 	end,
 	whileDead = 1,
