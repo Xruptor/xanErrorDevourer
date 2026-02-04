@@ -6,50 +6,80 @@
 	You can add custom errors in the options menu.
 --]]
 
-local ADDON_NAME, addon = ...
-if not _G[ADDON_NAME] then
-	_G[ADDON_NAME] = CreateFrame("Frame", ADDON_NAME, UIParent, BackdropTemplateMixin and "BackdropTemplate")
+local ADDON_NAME, private = ...
+if type(private) ~= "table" then
+	private = {}
 end
-addon = _G[ADDON_NAME]
 
-local L = LibStub("AceLocale-3.0"):GetLocale(ADDON_NAME)
+local _G = _G
+local string = string
+local table = table
+local pairs = pairs
+local type = type
+
+local lower = string.lower
+local find = string.find
+local tinsert = table.insert
+local tsort = table.sort
+
+local addon = _G[ADDON_NAME]
+if not addon then
+	addon = CreateFrame("Frame", ADDON_NAME, UIParent, BackdropTemplateMixin and "BackdropTemplate")
+	_G[ADDON_NAME] = addon
+end
+
+local L = private.L or {}
 
 local storedBarCount = 0
 local prevClickedBar
 local errorList = ""
+local errorListEmpty = true
 
-local debugf = tekDebug and tekDebug:GetFrame(ADDON_NAME)
-local function Debug(...)
-    if debugf then debugf:AddMessage(string.join(", ", tostringall(...))) end
-end
-
-addon:RegisterEvent("ADDON_LOADED")
-addon:SetScript("OnEvent", function(self, event, ...)
-	if event == "ADDON_LOADED" or event == "PLAYER_LOGIN" then
-		if event == "ADDON_LOADED" then
-			local arg1 = ...
-			if arg1 and arg1 == ADDON_NAME then
-				self:UnregisterEvent("ADDON_LOADED")
-				self:RegisterEvent("PLAYER_LOGIN")
-			end
-			return
-		end
+local function OnEvent(self, event, ...)
+	if event == "ADDON_LOADED" then
+		local name = ...
+		if name ~= ADDON_NAME then return end
+		self:UnregisterEvent("ADDON_LOADED")
 		if IsLoggedIn() then
-			self:EnableAddon(event, ...)
-			self:UnregisterEvent("PLAYER_LOGIN")
+			self:EnableAddon()
+		else
+			self:RegisterEvent("PLAYER_LOGIN")
 		end
 		return
 	end
-	if self[event] then
-		return self[event](self, event, ...)
+	if event == "PLAYER_LOGIN" then
+		self:UnregisterEvent("PLAYER_LOGIN")
+		self:EnableAddon()
+		return
 	end
-end)
+	local handler = self[event]
+	if handler then
+		return handler(self, event, ...)
+	end
+end
+
+addon:RegisterEvent("ADDON_LOADED")
+addon:SetScript("OnEvent", OnEvent)
 
 
 local function updateErrorList()
-	errorList = ""
+	if not xErrD_DB then
+		errorList = ""
+		errorListEmpty = true
+		return
+	end
+	local parts = {}
 	for k, v in pairs(xErrD_DB) do
-		errorList = errorList.."|"..string.lower(k)
+		if v and type(k) == "string" then
+			parts[#parts + 1] = lower(k)
+		end
+	end
+	if #parts == 0 then
+		errorList = ""
+		errorListEmpty = true
+	else
+		errorList = "|" .. table.concat(parts, "|")
+		errorListEmpty = false
 	end
 end
 
@@ -79,6 +109,8 @@ function addon:EnableAddon()
 				xErrD_DB[string.lower(k)] = true
 			end
 		end
+		local getMeta = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
+		local ver = (type(getMeta) == "function" and getMeta(ADDON_NAME, "Version")) or "1.0"
 		xErrD_DB.dbver = ver
 	end
 	
@@ -94,28 +126,35 @@ function addon:EnableAddon()
 		addon:Show()
 	end
 	
-	local ver = C_AddOns.GetAddOnMetadata(ADDON_NAME,"Version") or '1.0'
-	DEFAULT_CHAT_FRAME:AddMessage(string.format("|cFF99CC33%s|r [v|cFF20ff20%s|r] loaded:   /xed", ADDON_NAME, ver or "1.0"))
+	local getMeta = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
+	local ver = (type(getMeta) == "function" and getMeta(ADDON_NAME, "Version")) or "1.0"
+	DEFAULT_CHAT_FRAME:AddMessage(string.format("|cFF99CC33%s|r [v|cFF20ff20%s|r] loaded:   /xed", ADDON_NAME, ver))
 	
 end
 
 --Nom-Nom-Nom Errors!
 local originalOnEvent = UIErrorsFrame:GetScript("OnEvent")
 UIErrorsFrame:SetScript("OnEvent", function(self, event, num, msg, r, g, b, ...)
-	if not xErrD_DB then return end
-	--only allow errors that aren't in our list
-	if msg then
-	
-		--check out DB
-		if xErrD_DB[string.lower(msg)] then
-			return
+	if not msg then
+		if originalOnEvent then
+			return originalOnEvent(self, event, num, msg, r, g, b, ...)
 		end
-		--check with find in string
-		if errorList and string.find(errorList, string.lower(msg)) then
-			return
+		return
+	end
+	if not xErrD_DB then
+		if originalOnEvent then
+			return originalOnEvent(self, event, num, msg, r, g, b, ...)
 		end
-		
-		--return original
+		return
+	end
+	local msgLower = lower(msg)
+	if xErrD_DB[msgLower] then
+		return
+	end
+	if not errorListEmpty and find(errorList, msgLower, 1, true) then
+		return
+	end
+	if originalOnEvent then
 		return originalOnEvent(self, event, num, msg, r, g, b, ...)
 	end
 end)
@@ -171,17 +210,15 @@ scrollFrame:Hide()
 addon:Hide()
 
 --Add Error
-addErrorBTN = CreateFrame("Button", ADDON_NAME.."_AddError", addon, "UIPanelButtonTemplate")
-addErrorBTN:SetWidth(120)
-addErrorBTN:SetHeight(25)
+local addErrorBTN = CreateFrame("Button", ADDON_NAME.."_AddError", addon, "UIPanelButtonTemplate")
+addErrorBTN:SetSize(120, 25)
 addErrorBTN:SetPoint("BOTTOMLEFT", addon, "BOTTOMLEFT", 20, 15)
 addErrorBTN:SetText(L.AddError)
 addErrorBTN:SetScript("OnClick", function() StaticPopup_Show("XANERRD_ADDERROR") end)
 
 --Remove Error
-RemErrorBTN = CreateFrame("Button", ADDON_NAME.."_RemoveError", addon, "UIPanelButtonTemplate")
-RemErrorBTN:SetWidth(120)
-RemErrorBTN:SetHeight(25)
+local RemErrorBTN = CreateFrame("Button", ADDON_NAME.."_RemoveError", addon, "UIPanelButtonTemplate")
+RemErrorBTN:SetSize(120, 25)
 RemErrorBTN:SetPoint("BOTTOMRIGHT", addon, "BOTTOMRIGHT", -20, 15)
 RemErrorBTN:SetText(L.RemoveError)
 RemErrorBTN:SetScript("OnClick", function()
@@ -224,35 +261,55 @@ StaticPopupDialogs["XANERRD_ADDERROR"] = {
 
 function addon:DoErrorList()
 	scrollFrame_Child:SetPoint("TOPLEFT")
-	scrollFrame_Child:SetWidth(scrollFrame:GetWidth())
-	scrollFrame_Child:SetHeight(scrollFrame:GetHeight())
+	scrollFrame_Child:SetSize(scrollFrame:GetWidth(), scrollFrame:GetHeight())
 	
 	local previousBar
 	local buildList = {}
 	
 	--first lets collect all the known items
 	--standard error list
-	for k, v in pairs(xErrD) do
-		table.insert(buildList, { name=string.lower(k), val=1 } )
+	for k in pairs(xErrD) do
+		tinsert(buildList, { name=lower(k), val=1 } )
 	end
 	--localized error list
-	for k, v in pairs(xErrD_LOC) do
-		table.insert(buildList, { name=string.lower(k), val=2 } )
+	for k in pairs(xErrD_LOC) do
+		tinsert(buildList, { name=lower(k), val=2 } )
 	end
 	--custom db
-	for k, v in pairs(xErrD_CDB) do
-		table.insert(buildList, { name=string.lower(k), val=3 } )
+	for k in pairs(xErrD_CDB) do
+		tinsert(buildList, { name=lower(k), val=3 } )
 	end
 	
 	--sort it based on where the list is coming from
-	table.sort(buildList, function(a,b) return (a.val < b.val) end)
+	tsort(buildList, function(a,b) return (a.val < b.val) end)
 	
-	for barCount=1, table.getn(buildList) do
+	local total = #buildList
+	for barCount=1, total do
 		
 		--store the bar counts for future use
 		if barCount > storedBarCount then storedBarCount = barCount end
 		
-		local barSlot = _G["xED_Bar"..barCount] or CreateFrame("button", "xED_Bar"..barCount, scrollFrame_Child, BackdropTemplateMixin and "BackdropTemplate")
+		local barSlot = _G["xED_Bar"..barCount]
+		if not barSlot then
+			barSlot = CreateFrame("button", "xED_Bar"..barCount, scrollFrame_Child, BackdropTemplateMixin and "BackdropTemplate")
+			barSlot:EnableMouse(true)
+			barSlot:SetBackdrop({
+				bgFile = "Interface\\Buttons\\WHITE8x8",
+			})
+			barSlot:SetBackdropColor(0,0,0,0)
+			barSlot:SetScript("OnClick", function(self)
+				if prevClickedBar then
+					prevClickedBar:SetBackdropColor(0,0,0,0)
+				end
+				prevClickedBar = self
+				self:SetBackdropColor(0,1,0,0.25)
+				if self.xData and self.xData.val and self.xData.val == 3 then
+					RemErrorBTN:Enable()
+				else
+					RemErrorBTN:Disable()
+				end
+			end)
+		end
 		
 		if barCount==1 then
 			barSlot:SetPoint("TOPLEFT",scrollFrame_Child, "TOPLEFT", 10, -10)
@@ -262,57 +319,47 @@ function addon:DoErrorList()
 			barSlot:SetPoint("BOTTOMRIGHT", previousBar, "BOTTOMRIGHT", 0, -20)
 		end
 
-		barSlot:EnableMouse(true)
-		barSlot:SetBackdrop({
-			bgFile = "Interface\\Buttons\\WHITE8x8",
-		})
-        barSlot:SetBackdropColor(0,0,0,0)
-		--barSlot:SetScript("OnEnter", function(self) self:SetBackdropColor(0,1,0,0.25) end)
-		--barSlot:SetScript("OnLeave", function(self) self:SetBackdropColor(0,0,0,0) end)
-		
 		--store previous bar to position correctly for next one ;)
 		previousBar = barSlot
 
 		--store the data
 		barSlot.xData = buildList[barCount]
 		
-		--set as current clicked bar for removal if clicked
-		barSlot:SetScript("OnClick", function(self)
-			if prevClickedBar then
-				prevClickedBar:SetBackdropColor(0,0,0,0)
-			end
-			prevClickedBar = self
-			self:SetBackdropColor(0,1,0,0.25)
-			--enable or disable remove button based on val
-			if self.xData and self.xData.val and self.xData.val == 3 then
-				RemErrorBTN:Enable()
-			else
-				RemErrorBTN:Disable()
-			end
-		end)
-		
 		--check button stuff
-		local bar_chk = _G["xED_BarChk"..barCount] or CreateFrame("CheckButton", "xED_BarChk"..barCount, barSlot, "InterfaceOptionsCheckButtonTemplate")
+		local bar_chk = _G["xED_BarChk"..barCount]
+		if not bar_chk then
+			bar_chk = CreateFrame("CheckButton", "xED_BarChk"..barCount, barSlot, "InterfaceOptionsCheckButtonTemplate")
+			bar_chk:SetPoint("LEFT", 4, 0)
+			bar_chk:SetScript("OnClick", function(self)
+				local checked = self:GetChecked()
+				if self.xData and self.xData.name and xErrD_DB then
+					if checked then
+						xErrD_DB[self.xData.name] = true
+					else
+						if xErrD_DB[self.xData.name] then xErrD_DB[self.xData.name] = nil end
+					end
+					updateErrorList()
+				end
+				self:GetParent():Click()
+			end)
+		end
 		
 		--change text color depending on where the entry came from
+		local barText = bar_chk.Text or _G[bar_chk:GetName().."Text"]
 		if buildList[barCount].val == 1 then
 			--standard list
-			_G["xED_BarChk"..barCount.."Text"]:SetText("|cFFFFFFFF"..buildList[barCount].name.."|r")
+			barText:SetText("|cFFFFFFFF"..buildList[barCount].name.."|r")
 		elseif buildList[barCount].val == 2 then
 			--localizard list
-			_G["xED_BarChk"..barCount.."Text"]:SetText("|cFF61F200"..buildList[barCount].name.."|r")
+			barText:SetText("|cFF61F200"..buildList[barCount].name.."|r")
 		else
 			--custom list
-			_G["xED_BarChk"..barCount.."Text"]:SetText("|cFFFF9933"..buildList[barCount].name.."|r")
+			barText:SetText("|cFFFF9933"..buildList[barCount].name.."|r")
 		end
-		_G["xED_BarChk"..barCount.."Text"]:SetFontObject("GameFontNormal")
+		barText:SetFontObject("GameFontNormal")
         
 		--store the data
 		bar_chk.xData = buildList[barCount]
-		
-        bar_chk:SetPoint("LEFT", 4, 0)
-		--bar_chk:SetScript("OnEnter", function() barSlot:SetBackdropColor(0,1,0,0.25) end)
-		--bar_chk:SetScript("OnLeave", function() barSlot:SetBackdropColor(0,0,0,0) end)
 		
 		--set if checked or not
 		if xErrD_DB and xErrD_DB[buildList[barCount].name] then
@@ -321,32 +368,14 @@ function addon:DoErrorList()
 			bar_chk:SetChecked(false)
         end
 		
-		bar_chk:SetScript("OnClick", function(self)
-			local checked = self:GetChecked()
-			
-			--update the DB
-			if self.xData and self.xData.name and xErrD_DB then
-				if checked then
-					xErrD_DB[self.xData.name] = true
-				else
-					--delete it if it exsists
-					if xErrD_DB[self.xData.name] then xErrD_DB[self.xData.name] = nil end
-				end
-				--update error list
-				updateErrorList()
-			end
-			--highlight the bar ;)
-			self:GetParent():Click()
-		end)
-		
 		--show them if hidden
 		barSlot:Show()
 		bar_chk:Show()
 	end
 	
 	--hide the unused bars (if some custom ones were removed)
-	if table.getn(buildList) < storedBarCount then
-		for q=table.getn(buildList)+1, storedBarCount do
+	if total < storedBarCount then
+		for q=total+1, storedBarCount do
 			if _G["xED_Bar"..q] then _G["xED_Bar"..q]:Hide() end
 			if _G["xED_BarChk"..q] then _G["xED_BarChk"..q]:Hide() end
 		end
@@ -364,7 +393,10 @@ function addon:processAdd(err)
 	if not err then return end
 	if not xErrD_CDB then return end
 	
-	err = string.lower(err) --force to lowercase
+	local trim = strtrim or function(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
+	err = trim(err)
+	if err == "" then return end
+	err = lower(err) --force to lowercase
 	if xErrD_CDB[err] then return end --don't add the same darn error twice
 	
 	xErrD_CDB[err] = true --lets add it to the custom DB

@@ -1,6 +1,6 @@
-local ADDON_NAME, addon = ...
+local ADDON_NAME, private = ...
 
-local L = LibStub("AceLocale-3.0"):NewLocale(ADDON_NAME, "ruRU")
+local L = private:NewLocale("ruRU")
 if not L then return end
 -- Translator ZamestoTV
 L.NomNomNom = "|cFF99CC33Ням-Ням-Ням Ошибки!|r"
@@ -11,7 +11,7 @@ L.Yes = "Да"
 L.No = "Нет"
 
 
-xErrD_LOC = GetLocale() == "ruRU" and {
+xErrD_LOC = private:IsCurrentLocale("ruRU") and {
     ["you are too far away"] = "вы слишком далеко",
     ["can't attack while horrified."] = "нельзя атаковать в состоянии ужаса.",
     ["can't do that while horrified."] = "нельзя это делать в состоянии ужаса.",

@@ -1,6 +1,6 @@
-local ADDON_NAME, addon = ...
+local ADDON_NAME, private = ...
 
-local L = LibStub("AceLocale-3.0"):NewLocale(ADDON_NAME, "zhTW")
+local L = private:NewLocale("zhTW")
 if not L then return end
 
 L.NomNomNom = "|cFF99CC33Nom-Nom-Nom 錯誤！|r"
